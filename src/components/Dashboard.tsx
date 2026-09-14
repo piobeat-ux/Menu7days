@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
 import { mealPlan } from '../data/mealPlan';
+import { getTranslatedMealTitle } from '../data/mealPlanI18n';
 
 interface DashboardProps {
   onNavigateToMenu: () => void;
@@ -280,7 +281,9 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
             <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-gray-50">
               <span className="text-2xl">{meal.image}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{meal.title}</p>
+                <p className="text-sm font-medium text-gray-800 truncate">
+                  {getTranslatedMealTitle(currentDay, meal.type, language)}
+                </p>
                 <p className="text-xs text-gray-500">{meal.calories} {t.common.kcal} • {meal.protein}г {t.common.protein}</p>
               </div>
             </div>

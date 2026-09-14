@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
 import { mealPlan, Meal } from '../data/mealPlan';
+import { getTranslatedMealTitle, getTranslatedIngredients, getTranslatedSteps } from '../data/mealPlanI18n';
 
 interface MenuProps {
   onAddToShopping: (ingredients: string[]) => void;
@@ -19,6 +20,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
   });
   const [ingredientChecks, setIngredientChecks] = useState<Record<string, boolean>>({});
 
+  const { language } = useLanguage();
   const dayPlan = mealPlan[currentDay - 1];
   const mealTypeLabels = {
     breakfast: { label: t.menu.mealTypes.breakfast, emoji: '🌅', color: 'from-amber-50 to-yellow-50 border-amber-200' },
@@ -86,6 +88,9 @@ export default function Menu({ onAddToShopping }: MenuProps) {
           const mealId = `${currentDay}-${meal.type}`;
           const isExpanded = expandedMeal === mealId;
           const cooked = isCooked(meal);
+          const translatedTitle = getTranslatedMealTitle(currentDay, meal.type, language);
+          const translatedIngredients = getTranslatedIngredients(currentDay, meal.type, language);
+          const translatedSteps = getTranslatedSteps(currentDay, meal.type, language);
 
           return (
             <motion.div
@@ -108,7 +113,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                         {typeInfo.emoji} {typeInfo.label}
                       </p>
                       <p className={`font-semibold text-gray-800 truncate ${cooked ? 'line-through' : ''}`}>
-                        {meal.title}
+                        {translatedTitle}
                       </p>
                       <div className="flex gap-3 mt-1">
                         <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
@@ -149,7 +154,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                       <div className="mt-3">
                         <h4 className="font-semibold text-gray-700 text-sm mb-2">{t.menu.ingredients}</h4>
                         <div className="space-y-1.5">
-                          {meal.ingredients.map((ing, i) => {
+                          {translatedIngredients.map((ing, i) => {
                             const key = `${mealId}-ing-${i}`;
                             const checked = ingredientChecks[key];
                             return (
@@ -176,7 +181,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                       <div className="mt-4">
                         <h4 className="font-semibold text-gray-700 text-sm mb-2">{t.menu.preparation}</h4>
                         <div className="space-y-2">
-                          {meal.steps.map((step, i) => (
+                          {translatedSteps.map((step, i) => (
                             <div key={i} className="flex gap-2">
                               <span className="flex-shrink-0 w-5 h-5 bg-green-100 text-green-700 rounded-full text-xs flex items-center justify-center font-medium">
                                 {i + 1}
@@ -190,7 +195,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                       {/* Actions */}
                       <div className="flex gap-2 mt-4">
                         <button
-                          onClick={() => onAddToShopping(meal.ingredients)}
+                          onClick={() => onAddToShopping(translatedIngredients)}
                           className="flex-1 py-2.5 bg-white/80 text-gray-700 rounded-xl text-sm font-medium hover:bg-white transition-colors border border-gray-200"
                         >
                           {t.menu.addToList}
