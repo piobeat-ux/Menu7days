@@ -1,0 +1,10 @@
+{
+  "name": "Сытая Неделя — 1600 ккал",
+  "short_name": "Сытая Неделя",
+  "description": "Интерактивный план питания на 7 дней — 1600 ккал, 100-120г белка",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9F9F9",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait"
+}
