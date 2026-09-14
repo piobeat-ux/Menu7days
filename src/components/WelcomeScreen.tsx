@@ -1,33 +1,22 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../i18n/LanguageContext';
+import { languageNames, languageFlags, Language } from '../i18n/translations';
 
 interface WelcomeScreenProps {
   onComplete: (name: string) => void;
 }
 
 export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
+  const { t, language, setLanguage } = useLanguage();
   const [name, setName] = useState('');
   const [step, setStep] = useState(0);
+  const [showLangPicker, setShowLangPicker] = useState(false);
 
   const slides = [
-    {
-      emoji: '🥗',
-      title: 'Сытая Неделя',
-      subtitle: '1600 ккал в день',
-      description: '7 дней вкусного и сбалансированного питания с рецептами'
-    },
-    {
-      emoji: '💪',
-      title: '100-120г белка',
-      subtitle: 'Каждый день',
-      description: 'Достаточное количество белка для здоровья и сытости'
-    },
-    {
-      emoji: '📱',
-      title: 'Всё в одном месте',
-      subtitle: 'Удобно и просто',
-      description: 'Меню, список покупок, рецепты и поддержка — в одном приложении'
-    }
+    t.welcome.slide1,
+    t.welcome.slide2,
+    t.welcome.slide3
   ];
 
   const handleNext = () => {
@@ -37,11 +26,48 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
   };
 
   const handleStart = () => {
-    onComplete(name.trim() || 'Друг');
+    onComplete(name.trim() || '');
   };
 
+  const languages: Language[] = ['ru', 'en', 'es', 'it', 'fr', 'de'];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 flex flex-col items-center justify-center px-6 max-w-lg mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 flex flex-col items-center justify-center px-6 max-w-lg mx-auto relative">
+      {/* Language Picker */}
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={() => setShowLangPicker(!showLangPicker)}
+          className="flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur rounded-full border border-gray-200 text-sm shadow-sm"
+        >
+          <span>{languageFlags[language]}</span>
+          <span className="text-xs text-gray-600">{language.toUpperCase()}</span>
+        </button>
+        {showLangPicker && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-10 right-0 bg-white rounded-xl shadow-lg border border-gray-100 p-2 min-w-[140px] z-50"
+          >
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                onClick={() => {
+                  setLanguage(lang);
+                  setShowLangPicker(false);
+                }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  language === lang ? 'bg-green-50 text-green-700' : 'hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                <span>{languageFlags[lang]}</span>
+                <span>{languageNames[lang]}</span>
+                {language === lang && <span className="ml-auto text-green-500">✓</span>}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </div>
+
       {/* Progress dots */}
       <div className="flex gap-2 mb-8">
         {slides.map((_, i) => (
@@ -68,7 +94,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
           transition={{ duration: 2, repeat: Infinity }}
           className="text-7xl mb-6"
         >
-          {slides[step].emoji}
+          {step === 0 ? '🥗' : step === 1 ? '💪' : '📱'}
         </motion.div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
           {slides[step].title}
@@ -94,7 +120,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Как тебя зовут? (необязательно)"
+                placeholder={t.welcome.namePlaceholder}
                 className="w-full px-5 py-3.5 bg-white border border-gray-200 rounded-2xl text-center text-sm focus:outline-none focus:border-green-400 shadow-sm"
               />
             </div>
@@ -102,7 +128,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
               onClick={handleStart}
               className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-green-200 hover:from-green-600 hover:to-green-700 transition-all"
             >
-              Начать 🚀
+              {t.welcome.start}
             </button>
           </motion.div>
         ) : (
@@ -110,7 +136,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             onClick={handleNext}
             className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-green-200 hover:from-green-600 hover:to-green-700 transition-all"
           >
-            Далее →
+            {t.welcome.next}
           </button>
         )}
         {step < slides.length - 1 && (
@@ -118,7 +144,7 @@ export default function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             onClick={handleStart}
             className="w-full py-3 text-gray-400 text-sm hover:text-gray-600 transition-colors"
           >
-            Пропустить
+            {t.welcome.skip}
           </button>
         )}
       </div>

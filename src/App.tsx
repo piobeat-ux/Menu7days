@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LanguageProvider } from './i18n/LanguageContext';
 import Dashboard from './components/Dashboard';
 import Menu from './components/Menu';
 import ShoppingList from './components/ShoppingList';
@@ -9,15 +10,15 @@ import WelcomeScreen from './components/WelcomeScreen';
 
 type Tab = 'home' | 'menu' | 'shopping' | 'sos' | 'settings';
 
-const tabs: { id: Tab; label: string; emoji: string }[] = [
-  { id: 'home', label: 'Главная', emoji: '🏠' },
-  { id: 'menu', label: 'Меню', emoji: '📅' },
-  { id: 'shopping', label: 'Покупки', emoji: '🛒' },
-  { id: 'sos', label: 'SOS', emoji: '🆘' },
-  { id: 'settings', label: 'Ещё', emoji: '⚙️' }
+const tabs: { id: Tab; labelKey: string; emoji: string }[] = [
+  { id: 'home', labelKey: 'home', emoji: '🏠' },
+  { id: 'menu', labelKey: 'menu', emoji: '📅' },
+  { id: 'shopping', labelKey: 'shopping', emoji: '🛒' },
+  { id: 'sos', labelKey: 'sos', emoji: '🆘' },
+  { id: 'settings', labelKey: 'settings', emoji: '⚙️' }
 ];
 
-function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [shoppingNewItems, setShoppingNewItems] = useState<string[]>([]);
   const [showWelcome, setShowWelcome] = useState(() => {
@@ -97,11 +98,6 @@ function App() {
               >
                 {tab.emoji}
               </motion.span>
-              <span className={`text-[10px] font-medium ${
-                activeTab === tab.id ? 'text-green-600' : 'text-gray-400'
-              }`}>
-                {tab.label}
-              </span>
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTabIndicator"
@@ -114,6 +110,14 @@ function App() {
         </div>
       </nav>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
 

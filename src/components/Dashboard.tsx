@@ -1,12 +1,89 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { motivationalQuotes, mealPlan } from '../data/mealPlan';
+import { useLanguage } from '../i18n/LanguageContext';
+import { mealPlan } from '../data/mealPlan';
 
 interface DashboardProps {
   onNavigateToMenu: () => void;
 }
 
+const motivationalQuotes = {
+  ru: [
+    "Каждый приём пищи — это шаг к лучшей версии себя 💪",
+    "Ты не на диете. Ты заботишься о себе 🌿",
+    "Дисциплина — это мост между целями и достижениями 🌉",
+    "Маленькие шаги каждый день = большие результаты 🏆",
+    "Твоё тело — твой дом. Заботься о нём 🏡",
+    "Не идеальность, а последовательность имеет значение ✨",
+    "Ты сильнее, чем думаешь 💚",
+    "Еда — это топливо, а не враг ⚡",
+    "Сегодня ты делаешь выбор, которым завтра будешь гордиться 🌟",
+    "Прогресс, а не совершенство 🎯"
+  ],
+  en: [
+    "Every meal is a step towards a better version of yourself 💪",
+    "You're not on a diet. You're taking care of yourself 🌿",
+    "Discipline is the bridge between goals and achievements 🌉",
+    "Small steps every day = big results 🏆",
+    "Your body is your home. Take care of it 🏡",
+    "Not perfection, but consistency matters ✨",
+    "You are stronger than you think 💚",
+    "Food is fuel, not the enemy ⚡",
+    "Today you make a choice you'll be proud of tomorrow 🌟",
+    "Progress, not perfection 🎯"
+  ],
+  es: [
+    "Cada comida es un paso hacia tu mejor versión 💪",
+    "No estás a dieta. Te estás cuidando 🌿",
+    "La disciplina es el puente entre metas y logros 🌉",
+    "Pequeños pasos cada día = grandes resultados 🏆",
+    "Tu cuerpo es tu hogar. Cuídalo 🏡",
+    "No la perfección, sino la consistencia importa ✨",
+    "Eres más fuerte de lo que crees 💚",
+    "La comida es combustible, no el enemigo ⚡",
+    "Hoy tomas una decisión de la que estarás orgulloso mañana 🌟",
+    "Progreso, no perfección 🎯"
+  ],
+  it: [
+    "Ogni pasto è un passo verso la tua versione migliore 💪",
+    "Non sei a dieta. Ti stai prendendo cura di te 🌿",
+    "La disciplina è il ponte tra obiettivi e risultati 🌉",
+    "Piccoli passi ogni giorno = grandi risultati 🏆",
+    "Il tuo corpo è la tua casa. Abbi cura di lui 🏡",
+    "Non la perfezione, ma la costanza conta ✨",
+    "Sei più forte di quanto pensi 💚",
+    "Il cibo è carburante, non il nemico ⚡",
+    "Oggi fai una scelta di cui sarai orgoglioso domani 🌟",
+    "Progresso, non perfezione 🎯"
+  ],
+  fr: [
+    "Chaque repas est un pas vers ta meilleure version 💪",
+    "Tu n'es pas au régime. Tu prends soin de toi 🌿",
+    "La discipline est le pont entre les objectifs et les résultats 🌉",
+    "De petits pas chaque jour = de grands résultats 🏆",
+    "Ton corps est ta maison. Prends-en soin 🏡",
+    "Pas la perfection, mais la constance compte ✨",
+    "Tu es plus fort(e) que tu ne le penses 💚",
+    "La nourriture est du carburant, pas l'ennemi ⚡",
+    "Aujourd'hui tu fais un choix dont tu seras fier(e) demain 🌟",
+    "Le progrès, pas la perfection 🎯"
+  ],
+  de: [
+    "Jede Mahlzeit ist ein Schritt zu deiner besten Version 💪",
+    "Du bist nicht auf Diät. Du kümmerst dich um dich 🌿",
+    "Disziplin ist die Brücke zwischen Zielen und Ergebnissen 🌉",
+    "Kleine Schritte jeden Tag = große Ergebnisse 🏆",
+    "Dein Körper ist dein Zuhause. Pass gut auf ihn auf 🏡",
+    "Nicht Perfektion, sondern Konsequenz zählt ✨",
+    "Du bist stärker als du denkst 💚",
+    "Essen ist Treibstoff, nicht der Feind ⚡",
+    "Heute triffst du eine Wahl, auf die du morgen stolz sein wirst 🌟",
+    "Fortschritt, nicht Perfektion 🎯"
+  ]
+};
+
 export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
+  const { t, language } = useLanguage();
   const [waterCount, setWaterCount] = useState(() => {
     const saved = localStorage.getItem('waterCount');
     return saved ? parseInt(saved) : 0;
@@ -25,13 +102,14 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Доброе утро');
-    else if (hour < 18) setGreeting('Добрый день');
-    else setGreeting('Добрый вечер');
+    if (hour < 12) setGreeting(t.dashboard.greeting.morning);
+    else if (hour < 18) setGreeting(t.dashboard.greeting.day);
+    else setGreeting(t.dashboard.greeting.evening);
 
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    setQuote(motivationalQuotes[dayOfYear % motivationalQuotes.length]);
-  }, []);
+    const quotes = motivationalQuotes[language];
+    setQuote(quotes[dayOfYear % quotes.length]);
+  }, [t, language]);
 
   useEffect(() => {
     localStorage.setItem('waterCount', waterCount.toString());
@@ -64,7 +142,9 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
         <h1 className="text-2xl font-bold text-gray-800">
           {greeting}! 👋
         </h1>
-        <p className="text-gray-500 mt-1">Сегодня День {currentDay} из 7</p>
+        <p className="text-gray-500 mt-1">
+          {t.dashboard.dayOf.replace('{n}', currentDay.toString())}
+        </p>
       </motion.div>
 
       {/* Stats Cards */}
@@ -75,9 +155,9 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
           transition={{ delay: 0.1 }}
           className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-4 border border-green-200"
         >
-          <p className="text-xs text-green-600 font-medium">Калории сегодня</p>
+          <p className="text-xs text-green-600 font-medium">{t.dashboard.caloriesToday}</p>
           <p className="text-2xl font-bold text-green-800 mt-1">{totalCalories}</p>
-          <p className="text-xs text-green-600">ккал</p>
+          <p className="text-xs text-green-600">{t.common.kcal}</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -85,9 +165,9 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
           transition={{ delay: 0.2 }}
           className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 border border-orange-200"
         >
-          <p className="text-xs text-orange-600 font-medium">Белок сегодня</p>
+          <p className="text-xs text-orange-600 font-medium">{t.dashboard.proteinToday}</p>
           <p className="text-2xl font-bold text-orange-800 mt-1">{totalProtein}г</p>
-          <p className="text-xs text-orange-600">цель: 100-120г</p>
+          <p className="text-xs text-orange-600">{t.dashboard.goal}</p>
         </motion.div>
       </div>
 
@@ -99,8 +179,10 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
         className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4"
       >
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-gray-800">💧 Трекер воды</h3>
-          <span className="text-sm text-gray-500">{waterCount}/8 стаканов</span>
+          <h3 className="font-semibold text-gray-800">{t.dashboard.waterTracker}</h3>
+          <span className="text-sm text-gray-500">
+            {t.dashboard.glasses.replace('{n}', waterCount.toString())}
+          </span>
         </div>
         <div className="flex gap-2 justify-center flex-wrap">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -134,7 +216,7 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
             animate={{ opacity: 1 }}
             className="text-center text-green-600 text-sm mt-3 font-medium"
           >
-            🎉 Отлично! Норма выполнена!
+            {t.dashboard.done}
           </motion.p>
         )}
       </motion.div>
@@ -147,7 +229,7 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
         className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4"
       >
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-gray-800">🥩 Белок за день</h3>
+          <h3 className="font-semibold text-gray-800">{t.dashboard.proteinDay}</h3>
           <span className="text-sm text-gray-500">{proteinProgress}/120г</span>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-4 mb-3">
@@ -163,13 +245,13 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
             onClick={() => addProtein(15)}
             className="flex-1 py-2 bg-orange-50 text-orange-600 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors"
           >
-            +15г (перекус)
+            {t.dashboard.snack}
           </button>
           <button
             onClick={() => addProtein(30)}
             className="flex-1 py-2 bg-orange-50 text-orange-600 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors"
           >
-            +30г (осн.)
+            {t.dashboard.main}
           </button>
           <button
             onClick={() => setProteinProgress(0)}
@@ -188,8 +270,10 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
         className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4"
       >
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-gray-800">🍽️ Что ем сегодня</h3>
-          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">День {currentDay}</span>
+          <h3 className="font-semibold text-gray-800">{t.dashboard.whatToday}</h3>
+          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+            {t.menu.day} {currentDay}
+          </span>
         </div>
         <div className="space-y-2">
           {todayMeals.map((meal, i) => (
@@ -197,7 +281,7 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
               <span className="text-2xl">{meal.image}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 truncate">{meal.title}</p>
-                <p className="text-xs text-gray-500">{meal.calories} ккал • {meal.protein}г белка</p>
+                <p className="text-xs text-gray-500">{meal.calories} {t.common.kcal} • {meal.protein}г {t.common.protein}</p>
               </div>
             </div>
           ))}
@@ -206,7 +290,7 @@ export default function Dashboard({ onNavigateToMenu }: DashboardProps) {
           onClick={onNavigateToMenu}
           className="w-full mt-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-medium hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
         >
-          Открыть полное меню →
+          {t.dashboard.openMenu}
         </button>
       </motion.div>
 

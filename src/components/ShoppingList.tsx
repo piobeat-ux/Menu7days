@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../i18n/LanguageContext';
 import { shoppingCategories, mealPlan } from '../data/mealPlan';
 
 interface ShoppingListProps {
@@ -8,6 +9,7 @@ interface ShoppingListProps {
 }
 
 export default function ShoppingList({ newItems, onClearNewItems }: ShoppingListProps) {
+  const { t } = useLanguage();
   const [checkedItems, setCheckedItems] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('checkedShoppingItems');
     return saved ? new Set(JSON.parse(saved)) : new Set();
@@ -71,7 +73,6 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
       const newChecked = new Set(checkedItems);
       uniqueIngredients.forEach(ing => newChecked.delete(ing));
       setCheckedItems(newChecked);
-      // Add to custom items if not in categories
       const categoryItems = shoppingCategories.flatMap(c => c.items);
       const newCustom = uniqueIngredients.filter(ing => !categoryItems.some(ci => ing.includes(ci.split(' ')[0])));
       setCustomItems(prev => [...new Set([...prev, ...newCustom])]);
@@ -88,6 +89,8 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
 
   const getCheckedCount = () => checkedItems.size;
 
+  const categoryKeys: (keyof typeof t.shopping.categories)[] = ['protein', 'grains', 'vegetables', 'fruits', 'dairy', 'oils', 'other'];
+
   return (
     <div className="px-4 pb-4 pt-2 max-w-lg mx-auto">
       {/* Header */}
@@ -96,9 +99,9 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <h1 className="text-2xl font-bold text-gray-800">🛒 Список покупок</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{t.shopping.title}</h1>
         <p className="text-gray-500 text-sm mt-1">
-          {getCheckedCount()} из {getTotalItems()} куплено
+          {t.shopping.bought.replace('{n}', getCheckedCount().toString()).replace('{total}', getTotalItems().toString())}
         </p>
       </motion.div>
 
@@ -118,7 +121,7 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
         transition={{ delay: 0.1 }}
         className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-4"
       >
-        <p className="text-sm text-gray-600 mb-2 font-medium">📅 Загрузить продукты на день:</p>
+        <p className="text-sm text-gray-600 mb-2 font-medium">{t.shopping.loadDay}</p>
         <div className="flex gap-2 overflow-x-auto scrollbar-hide">
           {[1, 2, 3, 4, 5, 6, 7].map(day => (
             <button
@@ -126,7 +129,7 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
               onClick={() => loadDayProducts(day)}
               className="flex-shrink-0 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
             >
-              День {day}
+              {t.menu.day} {day}
             </button>
           ))}
         </div>
@@ -138,13 +141,13 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
           onClick={clearChecked}
           className="flex-1 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
         >
-          🗑️ Очистить купленное
+          {t.shopping.clearBought}
         </button>
         <button
           onClick={() => setShowAddInput(!showAddInput)}
           className="flex-1 py-2.5 bg-green-50 text-green-600 rounded-xl text-sm font-medium hover:bg-green-100 transition-colors"
         >
-          ➕ Добавить свой
+          {t.shopping.addOwn}
         </button>
       </div>
 
@@ -163,7 +166,7 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
                 value={newCustomItem}
                 onChange={(e) => setNewCustomItem(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCustomItem()}
-                placeholder="Название продукта..."
+                placeholder={t.shopping.productPlaceholder}
                 className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400"
                 autoFocus
               />
@@ -185,7 +188,7 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
           animate={{ opacity: 1 }}
           className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-4"
         >
-          <h3 className="font-semibold text-gray-700 text-sm mb-3">📝 Свои продукты:</h3>
+          <h3 className="font-semibold text-gray-700 text-sm mb-3">{t.shopping.ownProducts}</h3>
           <div className="space-y-2">
             {customItems.map((item, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -219,6 +222,7 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
         {shoppingCategories.map((category, catIndex) => {
           const isExpanded = activeCategory === category.name;
           const categoryChecked = category.items.filter(item => checkedItems.has(item)).length;
+          const categoryLabel = t.shopping.categories[categoryKeys[catIndex]];
 
           return (
             <motion.div
@@ -235,9 +239,9 @@ export default function ShoppingList({ newItems, onClearNewItems }: ShoppingList
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{category.emoji}</span>
                   <div className="text-left">
-                    <p className="font-semibold text-gray-800 text-sm">{category.name}</p>
+                    <p className="font-semibold text-gray-800 text-sm">{categoryLabel}</p>
                     <p className="text-xs text-gray-500">
-                      {categoryChecked}/{category.items.length} куплено
+                      {categoryChecked}/{category.items.length} {t.shopping.bought.split(' ').pop()}
                     </p>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../i18n/LanguageContext';
 import { mealPlan, Meal } from '../data/mealPlan';
 
 interface MenuProps {
@@ -7,6 +8,7 @@ interface MenuProps {
 }
 
 export default function Menu({ onAddToShopping }: MenuProps) {
+  const { t } = useLanguage();
   const [currentDay, setCurrentDay] = useState(() => {
     return parseInt(localStorage.getItem('currentDay') || '1');
   });
@@ -19,10 +21,10 @@ export default function Menu({ onAddToShopping }: MenuProps) {
 
   const dayPlan = mealPlan[currentDay - 1];
   const mealTypeLabels = {
-    breakfast: { label: 'Завтрак', emoji: '🌅', color: 'from-amber-50 to-yellow-50 border-amber-200' },
-    lunch: { label: 'Обед', emoji: '☀️', color: 'from-green-50 to-emerald-50 border-green-200' },
-    snack: { label: 'Перекус', emoji: '🍎', color: 'from-blue-50 to-sky-50 border-blue-200' },
-    dinner: { label: 'Ужин', emoji: '🌙', color: 'from-purple-50 to-indigo-50 border-purple-200' }
+    breakfast: { label: t.menu.mealTypes.breakfast, emoji: '🌅', color: 'from-amber-50 to-yellow-50 border-amber-200' },
+    lunch: { label: t.menu.mealTypes.lunch, emoji: '☀️', color: 'from-green-50 to-emerald-50 border-green-200' },
+    snack: { label: t.menu.mealTypes.snack, emoji: '🍎', color: 'from-blue-50 to-sky-50 border-blue-200' },
+    dinner: { label: t.menu.mealTypes.dinner, emoji: '🌙', color: 'from-purple-50 to-indigo-50 border-purple-200' }
   };
 
   const setDay = (day: number) => {
@@ -55,8 +57,8 @@ export default function Menu({ onAddToShopping }: MenuProps) {
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <h1 className="text-2xl font-bold text-gray-800">📅 Меню на неделю</h1>
-        <p className="text-gray-500 text-sm mt-1">1600 ккал • 100-120г белка</p>
+        <h1 className="text-2xl font-bold text-gray-800">{t.menu.title}</h1>
+        <p className="text-gray-500 text-sm mt-1">{t.menu.subtitle}</p>
       </motion.div>
 
       {/* Day Selector */}
@@ -72,7 +74,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-green-300'
             }`}
           >
-            День {day.dayNumber}
+            {t.menu.day} {day.dayNumber}
           </motion.button>
         ))}
       </div>
@@ -110,10 +112,10 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                       </p>
                       <div className="flex gap-3 mt-1">
                         <span className="text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                          {meal.calories} ккал
+                          {meal.calories} {t.common.kcal}
                         </span>
                         <span className="text-xs font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
-                          {meal.protein}г белка
+                          {meal.protein}г {t.common.protein}
                         </span>
                       </div>
                     </div>
@@ -145,7 +147,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                     <div className="px-4 pb-4 border-t border-white/50">
                       {/* Ingredients */}
                       <div className="mt-3">
-                        <h4 className="font-semibold text-gray-700 text-sm mb-2">📝 Ингредиенты:</h4>
+                        <h4 className="font-semibold text-gray-700 text-sm mb-2">{t.menu.ingredients}</h4>
                         <div className="space-y-1.5">
                           {meal.ingredients.map((ing, i) => {
                             const key = `${mealId}-ing-${i}`;
@@ -172,7 +174,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
 
                       {/* Steps */}
                       <div className="mt-4">
-                        <h4 className="font-semibold text-gray-700 text-sm mb-2">👩‍🍳 Приготовление:</h4>
+                        <h4 className="font-semibold text-gray-700 text-sm mb-2">{t.menu.preparation}</h4>
                         <div className="space-y-2">
                           {meal.steps.map((step, i) => (
                             <div key={i} className="flex gap-2">
@@ -191,7 +193,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                           onClick={() => onAddToShopping(meal.ingredients)}
                           className="flex-1 py-2.5 bg-white/80 text-gray-700 rounded-xl text-sm font-medium hover:bg-white transition-colors border border-gray-200"
                         >
-                          🛒 В список покупок
+                          {t.menu.addToList}
                         </button>
                         <button
                           onClick={() => toggleCooked(mealId)}
@@ -201,7 +203,7 @@ export default function Menu({ onAddToShopping }: MenuProps) {
                               : 'bg-green-500 text-white hover:bg-green-600'
                           }`}
                         >
-                          {cooked ? '✓ Готово' : '👨‍🍳 Приготовил(а)'}
+                          {cooked ? t.menu.cooked : t.menu.iCooked}
                         </button>
                       </div>
                     </div>
@@ -221,13 +223,13 @@ export default function Menu({ onAddToShopping }: MenuProps) {
         className="mt-4 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm"
       >
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">Итого за день:</span>
+          <span className="text-sm text-gray-500">{t.menu.totalDay}</span>
           <div className="flex gap-3">
             <span className="text-sm font-semibold text-green-700">
-              {dayPlan?.meals.reduce((s, m) => s + m.calories, 0)} ккал
+              {dayPlan?.meals.reduce((s, m) => s + m.calories, 0)} {t.common.kcal}
             </span>
             <span className="text-sm font-semibold text-orange-700">
-              {dayPlan?.meals.reduce((s, m) => s + m.protein, 0)}г белка
+              {dayPlan?.meals.reduce((s, m) => s + m.protein, 0)}г {t.common.protein}
             </span>
           </div>
         </div>
